@@ -8,7 +8,6 @@ class m250607_200738_rbac_insert extends Migration
     {
         $auth = Yii::$app->authManager;
 
-        // Создаем разрешения
         $createPost = $auth->createPermission('createPost');
         $createPost->description = 'Create a post';
         $auth->add($createPost);
@@ -25,7 +24,6 @@ class m250607_200738_rbac_insert extends Migration
         $viewPost->description = 'View post';
         $auth->add($viewPost);
 
-        // Создаем роли
         $author = $auth->createRole('author');
         $auth->add($author);
 

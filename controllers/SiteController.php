@@ -9,6 +9,8 @@ use yii\web\Response;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
+use app\models\User;
+use app\components\UserFactory;
 
 class SiteController extends Controller
 {
@@ -64,6 +66,30 @@ class SiteController extends Controller
         return $this->render('index');
     }
 
+    public function actionRegister()
+    {
+        $model = new User();
+
+        if ($model->load(Yii::$app->request->post())) {
+            // Используем UserFactory для создания пользователя
+            $user = UserFactory::createUser ($model->username, $model->email, $model->password_hash);
+
+            if ($user->validate() && $user->save()) {
+                // Успешная регистрация
+                Yii::$app->session->setFlash('success', 'Регистрация прошла успешно.');
+                return $this->redirect(['site/index']);
+            } else {
+                // Ошибка валидации
+                Yii::$app->session->setFlash('error', 'Ошибка регистрации.');
+            }
+        }
+
+        return $this->render('register', [
+            'model' => $model,
+        ]);
+    }
+
+
     /**
      * Login action.
      *
@@ -96,33 +122,5 @@ class SiteController extends Controller
         Yii::$app->user->logout();
 
         return $this->goHome();
-    }
-
-    /**
-     * Displays contact page.
-     *
-     * @return Response|string
-     */
-    public function actionContact()
-    {
-        $model = new ContactForm();
-        if ($model->load(Yii::$app->request->post()) && $model->contact(Yii::$app->params['adminEmail'])) {
-            Yii::$app->session->setFlash('contactFormSubmitted');
-
-            return $this->refresh();
-        }
-        return $this->render('contact', [
-            'model' => $model,
-        ]);
-    }
-
-    /**
-     * Displays about page.
-     *
-     * @return string
-     */
-    public function actionAbout()
-    {
-        return $this->render('about');
     }
 }
